@@ -2,125 +2,184 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulação e Calculadora - Copa do Mundo 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulação Oficial e Calculadora - Copa do Mundo 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
         
-        /* Ajustes do Chaveamento Mata-Mata */
+        /* Ajustes Mobile para a Árvore do Mata-Mata */
         .bracket-container {
-            display: flex; gap: 2.5rem; padding: 2rem; overflow-x: auto; scroll-behavior: smooth;
-            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-            background-size: 20px 20px;
+            display: flex; gap: 1.5rem; padding: 1rem; overflow-x: auto; scroll-behavior: smooth;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
             background-color: #f8fafc;
             min-height: 700px;
+            -webkit-overflow-scrolling: touch; /* Suavidade no iOS */
         }
-        .bracket-column {
-            display: flex; flex-direction: column; min-width: 260px; flex-shrink: 0;
+        @media (min-width: 768px) {
+            .bracket-container { gap: 2.5rem; padding: 2rem; min-height: 750px; }
         }
-        .matches-wrapper {
-            display: flex; flex-direction: column; justify-content: space-around; height: 100%; flex: 1; gap: 0.5rem;
-        }
+        
+        .bracket-column { display: flex; flex-direction: column; min-width: 250px; flex-shrink: 0; }
+        @media (min-width: 768px) { .bracket-column { min-width: 280px; } }
+
+        .matches-wrapper { display: flex; flex-direction: column; justify-content: space-around; height: 100%; flex: 1; gap: 0.5rem; }
+        
         .match-card {
             background: white; border-radius: 0.5rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            padding: 0.75rem; border: 1px solid #e2e8f0; border-left: 4px solid #10b981;
+            padding: 0.5rem; border: 1px solid #e2e8f0; border-left: 5px solid #10b981;
             transition: all 0.2s ease; position: relative;
         }
+        @media (min-width: 640px) { .match-card { padding: 0.75rem; } }
         .match-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-left-color: #059669; }
         
         .team-row { display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0; }
         
+        /* Inputs Otimizados para Touch */
         .score-input {
-            width: 2.5rem; text-align: center; font-weight: bold; border: 1px solid #cbd5e1;
-            border-radius: 0.25rem; padding: 0.1rem; background: #f8fafc; color: #1e293b;
-            transition: all 0.2s;
+            width: 2rem; height: 2rem; text-align: center; font-weight: bold; border: 1px solid #cbd5e1;
+            border-radius: 0.375rem; padding: 0; background: #f8fafc; color: #1e293b;
+            transition: all 0.2s; font-size: 0.875rem;
+        }
+        @media (min-width: 640px) {
+            .score-input { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
         }
         .score-input:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); background: white; }
         .score-input:disabled { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; }
         
-        ::-webkit-scrollbar { height: 10px; width: 10px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 5px; border: 2px solid #f1f5f9; }
+        /* Ocultar setas numéricas (Spinners) */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* Scrollbars Customizados */
+        ::-webkit-scrollbar { height: 8px; width: 8px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #059669; }
+
+        #export-container {
+            position: absolute; left: -9999px; top: 0;
+            width: 1080px; height: 1080px;
+            background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-family: 'Inter', sans-serif;
+            padding: 40px; box-sizing: border-box; text-align: center;
+        }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col overflow-hidden">
 
     <!-- Header Principal -->
-    <header class="bg-gradient-to-r from-green-700 to-emerald-600 text-white shadow-md shrink-0 relative z-20">
-        <div class="max-w-7xl mx-auto px-4 py-4 md:py-5 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">🏆 Copa do Mundo 2026</h1>
-                <p class="text-green-100 mt-1 text-sm font-medium">Simulador Interativo e Chaveamento Automático</p>
+    <header class="bg-gradient-to-r from-green-800 via-green-700 to-emerald-600 text-white shadow-lg shrink-0 relative z-20">
+        <div class="max-w-7xl mx-auto px-3 py-3 md:px-4 md:py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="text-center sm:text-left">
+                <h1 class="text-xl md:text-3xl font-extrabold tracking-tight leading-tight">🏆 Copa do Mundo 2026</h1>
+                <p class="text-green-100 mt-0.5 text-xs md:text-sm font-medium">Regras Oficiais & Compartilhamento</p>
             </div>
-            <button onclick="clearResults()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition-colors flex items-center gap-2 text-sm border border-red-600">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                Limpar Resultados
+            <button onclick="clearResults()" class="bg-white/20 hover:bg-white/30 active:bg-white/40 text-white font-bold py-2 px-3 rounded-lg shadow-sm transition-colors flex items-center gap-2 text-xs md:text-sm border border-white/40 w-full sm:w-auto justify-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Reiniciar Simulação
             </button>
         </div>
     </header>
 
-    <!-- Banner de Campeão (Fica oculto até a final ser decidida) -->
-    <div id="champion-banner" class="hidden bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 text-yellow-900 text-center py-3 px-4 shadow-lg border-b-4 border-yellow-600 z-10 animate-fade-in shrink-0">
-        <h2 class="text-2xl md:text-4xl font-black uppercase tracking-widest drop-shadow-sm" id="champion-text"></h2>
-        <p class="text-sm font-bold mt-1 opacity-80">Vencedor da Copa do Mundo 2026!</p>
+    <!-- Banner de Campeão & Ação de Compartilhar -->
+    <div id="champion-banner" class="hidden bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 text-yellow-900 text-center py-3 px-3 shadow-lg border-b-4 border-yellow-600 z-10 shrink-0">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4">
+            <div>
+                <h2 class="text-xl md:text-3xl font-black uppercase tracking-widest drop-shadow-sm" id="champion-text"></h2>
+                <p class="text-xs md:text-sm font-bold mt-0.5 opacity-80">Vencedor Oficial da Copa do Mundo 2026!</p>
+            </div>
+            <button onclick="shareToWhatsApp()" class="mt-1 md:mt-0 bg-[#25D366] hover:bg-[#128C7E] active:bg-[#075E54] text-white font-bold py-2 px-4 md:px-6 rounded-full shadow-md flex items-center gap-2 transform transition md:hover:scale-105 border-2 border-white text-sm">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                Compartilhar
+            </button>
+        </div>
     </div>
 
     <!-- Abas de Navegação -->
-    <nav class="bg-white shadow-sm border-b border-gray-200 shrink-0 overflow-x-auto whitespace-nowrap z-10">
-        <div class="max-w-7xl mx-auto px-4 flex justify-center space-x-2 md:space-x-8">
-            <button id="tab-interactive" class="py-4 px-4 text-sm font-bold border-b-4 border-green-600 text-green-700 transition-colors" onclick="switchTab('interactive')">
-                ⚽ Simulador de Grupos
+    <nav class="bg-white shadow-sm border-b border-gray-200 shrink-0 overflow-x-auto z-10 scroll-smooth">
+        <div class="max-w-7xl mx-auto flex justify-start sm:justify-center whitespace-nowrap px-1">
+            <button id="tab-interactive" class="py-3 px-3 md:px-5 text-xs sm:text-sm font-bold border-b-4 border-green-600 text-green-700 transition-colors" onclick="switchTab('interactive')">
+                ⚽ Jogos
             </button>
-            <button id="tab-groups" class="py-4 px-4 text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-green-600 transition-colors" onclick="switchTab('groups')">
-                📊 Grupos (Tempo Real)
+            <button id="tab-groups" class="py-3 px-3 md:px-5 text-xs sm:text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-green-600 transition-colors" onclick="switchTab('groups')">
+                📊 Tabelas
             </button>
-            <button id="tab-bracket" class="py-4 px-4 text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-green-600 transition-colors" onclick="switchTab('bracket')">
-                ⚔️ Mata-Mata (Tempo Real)
+            <button id="tab-bracket" class="py-3 px-3 md:px-5 text-xs sm:text-sm font-bold border-b-4 border-transparent text-gray-500 hover:text-green-600 transition-colors" onclick="switchTab('bracket')">
+                ⚔️ Mata-Mata
             </button>
         </div>
     </nav>
 
     <!-- Conteúdo Principal -->
     <main class="flex-1 overflow-y-auto bg-gray-100">
-        <div class="max-w-7xl mx-auto p-4 md:p-6">
+        <div class="max-w-7xl mx-auto p-2 sm:p-4 md:p-6">
             
             <!-- 1. Aba: Simulador de Grupos -->
             <section id="view-interactive" class="block animate-fade-in">
-                <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded shadow-sm text-sm text-blue-900 flex items-center gap-3">
-                    <span class="text-2xl">💡</span>
-                    <p><strong>Preencha os resultados dos jogos!</strong> Os times marcados em <span class="bg-green-100 text-green-800 px-1 rounded font-bold border border-green-300">verde</span> representam os 32 classificados para o Mata-Mata (incluindo os 8 melhores 3º colocados).</p>
+                <div class="mb-4 bg-blue-50 border-l-4 border-blue-500 p-3 rounded shadow-sm text-xs md:text-sm text-blue-900 flex items-start sm:items-center gap-2 sm:gap-3">
+                    <span class="text-xl">📝</span>
+                    <p>Preencha os resultados para atualizar a classificação. Avançam os 2 primeiros e os 8 melhores 3º colocados (destacados em <span class="bg-green-100 text-green-800 px-1 rounded font-bold border border-green-300">verde</span>).</p>
                 </div>
-                <div id="interactive-container" class="grid grid-cols-1 xl:grid-cols-2 gap-8"></div>
+                <!-- Container principal grid para suportar as telas divididas -->
+                <div id="interactive-container" class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-8"></div>
             </section>
 
             <!-- 2. Aba: Grupos Leitura -->
             <section id="view-groups" class="hidden animate-fade-in">
-                <div class="mb-6 text-center">
-                    <h2 class="text-2xl font-bold text-gray-800">Classificação Final dos Grupos</h2>
-                    <p class="text-sm text-gray-500">Acompanhe as tabelas em tempo real com os classificados em verde.</p>
-                </div>
-                <div id="groups-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <div id="groups-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"></div>
             </section>
 
             <!-- 3. Aba: Mata-Mata -->
             <section id="view-bracket" class="hidden h-full flex flex-col animate-fade-in">
-                <div class="mb-2 text-center">
-                    <h2 class="text-2xl font-bold text-gray-800">Chaveamento Eliminatório</h2>
-                    <p class="text-sm text-gray-500">Deslize para o lado. Preencha os placares para avançar as equipes até a final!</p>
+                <div class="text-xs text-center text-gray-500 bg-white border rounded py-1 mb-2 sm:hidden">
+                    👉 Deslize para a direita para ver as finais
                 </div>
                 <!-- Container principal da árvore -->
-                <div class="bracket-container rounded-xl shadow-inner border border-gray-200 mt-4" id="bracket-container"></div>
+                <div class="bracket-container rounded-xl shadow-inner border border-gray-200" id="bracket-container"></div>
             </section>
 
         </div>
     </main>
 
+    <!-- ==========================================
+         TEMPLATE INVISÍVEL PARA EXPORTAÇÃO (PNG) 
+         ========================================== -->
+    <div id="export-container">
+        <!-- Logo / Titulo -->
+        <div class="bg-white/10 px-8 py-4 rounded-full border border-white/20 mb-12 shadow-lg">
+            <h1 class="text-4xl font-extrabold uppercase tracking-widest text-white">Simulação Copa 2026</h1>
+        </div>
+        <!-- Taça Gigante -->
+        <div class="text-[180px] leading-none mb-6 drop-shadow-2xl">🏆</div>
+        <!-- Bloco do Campeão -->
+        <div class="bg-yellow-400 text-yellow-900 rounded-3xl p-10 w-4/5 shadow-2xl border-8 border-yellow-500 relative">
+            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-yellow-900 text-yellow-400 px-6 py-2 rounded-full font-black uppercase text-xl border-4 border-yellow-400 shadow-md">Campeão</div>
+            <div class="flex flex-col items-center gap-6 mt-4">
+                <span id="exp-champ-flag" class="text-9xl drop-shadow-md"></span>
+                <span id="exp-champ-name" class="text-7xl font-black uppercase tracking-tight text-center"></span>
+            </div>
+        </div>
+        <!-- Bloco do Vice -->
+        <div class="mt-16 bg-gray-800/80 text-gray-300 rounded-2xl p-6 w-1/2 shadow-xl border-2 border-gray-600 flex flex-col items-center">
+            <div class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-2">Vice-Campeão</div>
+            <div class="flex items-center gap-4">
+                <span id="exp-vice-flag" class="text-5xl opacity-80"></span>
+                <span id="exp-vice-name" class="text-3xl font-bold"></span>
+            </div>
+        </div>
+        <!-- Footer watermark -->
+        <div class="absolute bottom-8 font-mono text-white/50 text-xl tracking-widest">SIMULADOR OFICIAL FIFA 2026</div>
+    </div>
+
     <script>
-        // Dicionário das Seleções
+        // Dicionário Oficial
         const T = {
             "MEX": { name: "México", flag: "🇲🇽" }, "RSA": { name: "África do Sul", flag: "🇿🇦" }, "KOR": { name: "Coreia do Sul", flag: "🇰🇷" }, "CZE": { name: "Rep. Tcheca", flag: "🇨🇿" },
             "CAN": { name: "Canadá", flag: "🇨🇦" }, "BIH": { name: "Bósnia", flag: "🇧🇦" }, "QAT": { name: "Catar", flag: "🇶🇦" }, "SUI": { name: "Suíça", flag: "🇨🇭" },
@@ -148,7 +207,9 @@
         
         let groupData = {};
         let knockoutData = { r32: [], r16: [], qf: [], sf: [], final: [] };
-        let qualifiedTeams = new Set(); // Conjunto global que guarda os IDs dos 32 classificados
+        let qualifiedTeams = new Set();
+        let currentChamp = null;
+        let currentRunnerUp = null;
 
         // --- INICIALIZAÇÃO ---
         function initApp() {
@@ -162,7 +223,6 @@
                         { t1: t[3], t2: t[0], s1: '', s2: '' }, { t1: t[1], t2: t[2], s1: '', s2: '' }
                     ], table: []
                 };
-                calculateGroupStats(l);
             });
 
             knockoutData.r32 = Array.from({length: 16}, () => ({ t1: null, t2: null, s1: '', s2: '', pen: null }));
@@ -172,30 +232,27 @@
             knockoutData.final = Array.from({length: 2}, (_, i) => ({ t1: null, t2: null, s1: '', s2: '', pen: null, title: i===0?'🏆 Grande Final':'🥉 3º Lugar' }));
 
             updateAllViews();
-            renderInteractiveSimulator(); // Renderiza inputs da fase de grupos 1 vez
+            renderInteractiveSimulator();
         }
 
-        // --- CORE LÓGICA: ATUALIZA TUDO ---
+        // --- ATUALIZAÇÕES GERAIS ---
         function updateAllViews() {
             groupLetters.forEach(l => calculateGroupStats(l));
             updateKnockoutTeams();
             propagateKnockouts();
             updateChampionBanner();
             
-            // Re-render UI Elements that depend on data
             groupLetters.forEach(l => renderSingleGroupTable(l)); 
             renderGroupsPrediction(); 
             renderBracketPrediction(); 
         }
 
         function clearResults() {
-            if(!confirm("Tem certeza que deseja zerar todos os placares da simulação?")) return;
-            
+            if(!confirm("Tem certeza que deseja zerar todos os resultados?")) return;
             groupLetters.forEach(l => groupData[l].matches.forEach(m => { m.s1 = ''; m.s2 = ''; }));
             Object.keys(knockoutData).forEach(round => {
                 knockoutData[round].forEach(m => { m.s1 = ''; m.s2 = ''; m.pen = null; });
             });
-            
             renderInteractiveSimulator(); 
             updateAllViews();
         }
@@ -216,10 +273,10 @@
             });
         }
 
-        // --- LÓGICA DOS GRUPOS ---
+        // --- CÁLCULO FASE DE GRUPOS ---
         function calculateGroupStats(letter) {
             let stats = {};
-            groupData[letter].teams.forEach(t => stats[t] = { id: t, pts: 0, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0 });
+            groupData[letter].teams.forEach(t => stats[t] = { id: t, pts: 0, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, group: letter });
 
             groupData[letter].matches.forEach(m => {
                 if (m.s1 !== '' && m.s2 !== '') {
@@ -236,9 +293,9 @@
             let table = Object.values(stats);
             table.forEach(t => t.gd = t.gf - t.ga);
             table.sort((a, b) => {
-                if (b.pts !== a.pts) return b.pts - a.pts;
-                if (b.gd !== a.gd) return b.gd - a.gd;
-                if (b.gf !== a.gf) return b.gf - a.gf;
+                if (b.pts !== a.pts) return b.pts - a.pts; // 1. Pontos
+                if (b.gd !== a.gd) return b.gd - a.gd;   // 2. Saldo Global
+                if (b.gf !== a.gf) return b.gf - a.gf;   // 3. Gols Marcados
                 return a.id.localeCompare(b.id);
             });
             groupData[letter].table = table;
@@ -252,49 +309,88 @@
             updateAllViews();
         }
 
-        // --- LÓGICA DO MATA-MATA (ALOCAÇÃO E PROGRESSÃO) ---
-        function updateKnockoutTeams() {
-            const standings = groupLetters.map(l => groupData[l].table);
-            const firsts = standings.map(g => g[0].id);
-            const seconds = standings.map(g => g[1].id);
-            const thirdsObj = standings.map((g, i) => ({ ...g[2], group: groupLetters[i] }));
-            
-            // Rankeia os melhores 3ºs
-            thirdsObj.sort((a, b) => {
+        // --- CÁLCULO E REGRAS DE MATA-MATA ---
+        function getBestThirds(standings) {
+            let thirds = standings.map(g => g[2]);
+            thirds.sort((a, b) => {
                 if (b.pts !== a.pts) return b.pts - a.pts;
                 if (b.gd !== a.gd) return b.gd - a.gd;
                 if (b.gf !== a.gf) return b.gf - a.gf;
                 return a.id.localeCompare(b.id);
             });
-            const thirds = thirdsObj.slice(0, 8).map(t => t.id);
+            return thirds.slice(0, 8);
+        }
 
-            // Popula Set Global de Classificados para a UI
-            qualifiedTeams.clear();
-            firsts.forEach(id => qualifiedTeams.add(id));
-            seconds.forEach(id => qualifiedTeams.add(id));
-            thirds.forEach(id => qualifiedTeams.add(id));
+        function extractTeam(thirdsList, allowedGroups, fallbackStr) {
+            for (let i = 0; i < thirdsList.length; i++) {
+                if (allowedGroups.includes(thirdsList[i].group)) {
+                    let team = thirdsList[i].id;
+                    thirdsList.splice(i, 1);
+                    return team;
+                }
+            }
+            // Se todos os 12 grupos tiverem iniciado e sobrar time, faz fallback de segurança
+            if (thirdsList.length > 0 && groupLetters.every(l => groupData[l].matches.some(m => m.s1 !== '' && m.s2 !== ''))) {
+                return thirdsList.shift().id;
+            }
+            return fallbackStr;
+        }
 
-            // Mapeamento dinâmico para os 16-avos de final
-            const m = knockoutData.r32;
-            m[0].t1 = firsts[0];  m[0].t2 = thirds[0] || null; // 1A x 3º(1)
-            m[1].t1 = seconds[4]; m[1].t2 = seconds[5];        // 2E x 2F
-            m[2].t1 = firsts[8];  m[2].t2 = seconds[0];        // 1I x 2A
-            m[3].t1 = firsts[4];  m[3].t2 = thirds[4] || null; // 1E x 3º(5)
+        function updateKnockoutTeams() {
+            const standings = groupLetters.map(l => groupData[l].table);
             
-            m[4].t1 = firsts[2];  m[4].t2 = thirds[2] || null; // 1C x 3º(3)
-            m[5].t1 = seconds[6]; m[5].t2 = seconds[7];        // 2G x 2H
-            m[6].t1 = firsts[10]; m[6].t2 = seconds[2];        // 1K x 2C
-            m[7].t1 = firsts[6];  m[7].t2 = thirds[6] || null; // 1G x 3º(7)
+            // Identifica quais grupos já tiveram pelo menos 1 placar preenchido
+            const startedGroups = groupLetters.filter(l => groupData[l].matches.some(m => m.s1 !== '' && m.s2 !== ''));
+            
+            // Se o grupo não iniciou, usa Placeholder. Senão, puxa a seleção atual da tabela.
+            const firsts = standings.map((g, i) => startedGroups.includes(groupLetters[i]) ? g[0].id : `1º Grupo ${groupLetters[i]}`);
+            const seconds = standings.map((g, i) => startedGroups.includes(groupLetters[i]) ? g[1].id : `2º Grupo ${groupLetters[i]}`);
+            
+            let bestThirdsObj = standings
+                .filter((g, i) => startedGroups.includes(groupLetters[i]))
+                .map(g => g[2]);
 
-            m[8].t1 = firsts[1];  m[8].t2 = thirds[1] || null; // 1B x 3º(2)
-            m[9].t1 = seconds[8]; m[9].t2 = seconds[9];        // 2I x 2J
-            m[10].t1 = firsts[9]; m[10].t2 = seconds[1];       // 1J x 2B
-            m[11].t1 = firsts[5]; m[11].t2 = thirds[5] || null;// 1F x 3º(6)
+            bestThirdsObj.sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.gd !== a.gd) return b.gd - a.gd;
+                if (b.gf !== a.gf) return b.gf - a.gf;
+                return a.id.localeCompare(b.id);
+            });
+            bestThirdsObj = bestThirdsObj.slice(0, 8);
+            
+            qualifiedTeams.clear();
+            standings.forEach((g, i) => {
+                if (startedGroups.includes(groupLetters[i])) {
+                    qualifiedTeams.add(g[0].id);
+                    qualifiedTeams.add(g[1].id);
+                }
+            });
+            bestThirdsObj.forEach(t => qualifiedTeams.add(t.id));
 
-            m[12].t1 = firsts[3]; m[12].t2 = thirds[3] || null;// 1D x 3º(4)
-            m[13].t1 = seconds[10]; m[13].t2 = seconds[11];    // 2K x 2L
-            m[14].t1 = firsts[11]; m[14].t2 = seconds[3];      // 1L x 2D
-            m[15].t1 = firsts[7]; m[15].t2 = thirds[7] || null;// 1H x 3º(8)
+            const m = knockoutData.r32;
+            m[0].t1 = seconds[0]; m[0].t2 = seconds[1]; // 2A vs 2B
+            m[1].t1 = firsts[2];  m[1].t2 = seconds[5]; // 1C vs 2F
+            m[2].t1 = firsts[4];  m[2].t2 = extractTeam(bestThirdsObj, ['A','B','C','D','F'], '3º A/B/C/D/F'); // 1E vs 3...
+            m[3].t1 = firsts[5];  m[3].t2 = seconds[2]; // 1F vs 2C
+            m[4].t1 = seconds[4]; m[4].t2 = seconds[8]; // 2E vs 2I
+            m[5].t1 = firsts[8];  m[5].t2 = extractTeam(bestThirdsObj, ['C','D','F','G','H'], '3º C/D/F/G/H'); // 1I vs 3...
+            m[6].t1 = firsts[0];  m[6].t2 = extractTeam(bestThirdsObj, ['C','E','F','H','I'], '3º C/E/F/H/I'); // 1A vs 3...
+            m[7].t1 = firsts[11]; m[7].t2 = extractTeam(bestThirdsObj, ['E','H','I','J','K'], '3º E/H/I/J/K'); // 1L vs 3...
+            m[8].t1 = firsts[6];  m[8].t2 = extractTeam(bestThirdsObj, ['A','E','H','I','J'], '3º A/E/H/I/J'); // 1G vs 3...
+            m[9].t1 = firsts[3];  m[9].t2 = extractTeam(bestThirdsObj, ['B','E','F','I','J'], '3º B/E/F/I/J'); // 1D vs 3...
+            m[10].t1 = firsts[7]; m[10].t2 = seconds[9]; // 1H vs 2J
+            m[11].t1 = seconds[10]; m[11].t2 = seconds[11]; // 2K vs 2L
+            m[12].t1 = firsts[1]; m[12].t2 = extractTeam(bestThirdsObj, ['E','F','G','I','J'], '3º E/F/G/I/J'); // 1B vs 3...
+            m[13].t1 = seconds[3]; m[13].t2 = seconds[6]; // 2D vs 2G
+            m[14].t1 = firsts[9]; m[14].t2 = seconds[7]; // 1J vs 2H
+            m[15].t1 = firsts[10]; m[15].t2 = extractTeam(bestThirdsObj, ['D','E','I','J','L'], '3º D/E/I/J/L'); // 1K vs 3...
+
+            // Limpa placares fantasmas em chaves que voltaram a ficar vazias
+            m.forEach(match => {
+                if (!T[match.t1] || !T[match.t2]) {
+                    match.s1 = ''; match.s2 = ''; match.pen = null;
+                }
+            });
         }
 
         const getWinner = (m) => {
@@ -318,17 +414,26 @@
                 for(let i=0; i<curr.length; i+=2) {
                     next[i/2].t1 = getWinner(curr[i]);
                     next[i/2].t2 = getWinner(curr[i+1]);
+                    // Se a chave não tem seleções reais, garante que inputs estejam limpos
+                    if (!T[next[i/2].t1] || !T[next[i/2].t2]) {
+                        next[i/2].s1 = ''; next[i/2].s2 = ''; next[i/2].pen = null;
+                    }
                 }
             };
             nextRound(knockoutData.r32, knockoutData.r16);
             nextRound(knockoutData.r16, knockoutData.qf);
             nextRound(knockoutData.qf, knockoutData.sf);
             
-            // Finais
             knockoutData.final[0].t1 = getWinner(knockoutData.sf[0]);
             knockoutData.final[0].t2 = getWinner(knockoutData.sf[1]);
             knockoutData.final[1].t1 = getLoser(knockoutData.sf[0]);
             knockoutData.final[1].t2 = getLoser(knockoutData.sf[1]);
+
+            knockoutData.final.forEach(match => {
+                if (!T[match.t1] || !T[match.t2]) {
+                    match.s1 = ''; match.s2 = ''; match.pen = null;
+                }
+            });
         }
 
         function handleKnockoutScore(round, matchIndex, teamNum, value) {
@@ -337,7 +442,6 @@
             const m = knockoutData[round][matchIndex];
             if (teamNum === 1) m.s1 = value; else m.s2 = value;
             
-            // Reset penalty if not tied
             if (m.s1 === '' || m.s2 === '' || parseInt(m.s1) !== parseInt(m.s2)) m.pen = null;
             updateAllViews();
         }
@@ -349,15 +453,72 @@
 
         function updateChampionBanner() {
             const finalMatch = knockoutData.final[0];
-            const champId = getWinner(finalMatch);
+            currentChamp = getWinner(finalMatch);
+            currentRunnerUp = getLoser(finalMatch);
             const banner = document.getElementById('champion-banner');
             const champText = document.getElementById('champion-text');
             
-            if (champId) {
-                champText.innerHTML = `👑 ${T[champId].flag} ${T[champId].name} 👑`;
+            if (currentChamp) {
+                champText.innerHTML = `👑 ${T[currentChamp].flag} ${T[currentChamp].name} 👑`;
                 banner.classList.remove('hidden');
             } else {
                 banner.classList.add('hidden');
+            }
+        }
+
+        // --- COMPARTILHAR NO WHATSAPP (GERADOR DE IMAGEM) ---
+        async function shareToWhatsApp() {
+            if (!currentChamp || !currentRunnerUp) return;
+
+            document.getElementById('exp-champ-flag').textContent = T[currentChamp].flag;
+            document.getElementById('exp-champ-name').textContent = T[currentChamp].name;
+            document.getElementById('exp-vice-flag').textContent = T[currentRunnerUp].flag;
+            document.getElementById('exp-vice-name').textContent = T[currentRunnerUp].name;
+
+            const exportDiv = document.getElementById('export-container');
+            exportDiv.style.left = '0';
+            exportDiv.style.zIndex = '-100';
+
+            try {
+                const canvas = await html2canvas(exportDiv, { scale: 1.2, useCORS: true });
+                exportDiv.style.left = '-9999px'; 
+
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'campeao_copa_2026.png', { type: 'image/png' });
+                    const shareText = `Simulei a Copa do Mundo 2026 e o campeão foi o ${T[currentChamp].name}! 🏆⚽`;
+
+                    // Compartilhamento Mobile Nativo
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                title: 'Meu Campeão da Copa',
+                                text: shareText,
+                                files: [file]
+                            });
+                            return; 
+                        } catch (err) {
+                            console.log('Compartilhamento cancelado ou não suportado na API.', err);
+                        }
+                    }
+
+                    // Fallback PC/Web
+                    alert('A imagem do seu campeão será baixada! Você pode enviá-la nas suas redes sociais ou WhatsApp!');
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'campeao_copa_2026.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    const waLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+                    setTimeout(() => window.open(waLink, '_blank'), 1000);
+
+                }, 'image/png');
+            } catch (e) {
+                console.error("Erro ao gerar imagem: ", e);
+                alert("Ocorreu um erro ao gerar a imagem de compartilhamento.");
+                exportDiv.style.left = '-9999px';
             }
         }
 
@@ -368,20 +529,19 @@
             let rows = '';
             groupData[letter].table.forEach((t, i) => {
                 const isQual = qualifiedTeams.has(t.id);
-                // Destaque em Verde para todos os Classificados
-                let bgClass = isQual ? "bg-green-100 border-l-4 border-green-500" : "bg-white opacity-75 grayscale-[20%]";
+                let bgClass = isQual ? "bg-green-50 border-l-4 border-green-500" : "bg-white opacity-70";
                 let textClass = isQual ? "text-green-900 font-bold" : "text-gray-500";
 
                 rows += `
-                    <tr class="border-t border-gray-200 ${bgClass} text-sm transition-colors">
-                        <td class="px-2 py-2 font-bold ${textClass}">${i + 1}</td>
-                        <td class="px-2 py-2 font-medium flex items-center gap-1 ${textClass}">
-                            ${T[t.id].flag} <span class="truncate w-20 sm:w-auto">${T[t.id].name}</span>
+                    <tr class="border-t border-gray-200 ${bgClass} text-xs sm:text-sm transition-colors">
+                        <td class="px-1 py-2 text-center font-bold ${textClass}">${i + 1}</td>
+                        <td class="px-1 py-2 font-medium flex items-center gap-1 ${textClass}">
+                            ${T[t.id].flag} <span class="truncate max-w-[60px] sm:max-w-[100px] inline-block">${T[t.id].name}</span>
                         </td>
-                        <td class="px-2 py-2 text-center font-bold ${textClass}">${t.pts}</td>
-                        <td class="px-2 py-2 text-center text-gray-500">${t.p}</td>
-                        <td class="px-2 py-2 text-center font-semibold ${t.gd > 0 ? 'text-green-600' : (t.gd < 0 ? 'text-red-500' : 'text-gray-500')}">${t.gd > 0 ? '+'+t.gd : t.gd}</td>
-                        <td class="px-2 py-2 text-center text-gray-500">${t.gf}</td>
+                        <td class="px-1 py-2 text-center font-bold ${textClass}">${t.pts}</td>
+                        <td class="px-1 py-2 text-center text-gray-500 hidden sm:table-cell">${t.p}</td>
+                        <td class="px-1 py-2 text-center font-semibold ${t.gd > 0 ? 'text-green-600' : (t.gd < 0 ? 'text-red-500' : 'text-gray-500')}">${t.gd > 0 ? '+'+t.gd : t.gd}</td>
+                        <td class="px-1 py-2 text-center text-gray-500">${t.gf}</td>
                     </tr>
                 `;
             });
@@ -393,38 +553,39 @@
             let html = '';
             groupLetters.forEach(letter => {
                 let matchesHtml = groupData[letter].matches.map((m, index) => `
-                    <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-gray-100 shadow-sm text-sm hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-1 w-1/3 justify-end text-right font-medium">
-                            <span class="truncate">${T[m.t1].name}</span> ${T[m.t1].flag}
+                    <div class="flex items-center justify-between bg-white p-2 rounded-md border border-gray-100 shadow-sm text-xs sm:text-sm">
+                        <div class="flex items-center gap-1 flex-1 justify-end text-right font-medium">
+                            <span class="truncate max-w-[65px] sm:max-w-none">${T[m.t1].name}</span> ${T[m.t1].flag}
                         </div>
-                        <div class="flex items-center gap-2 px-2">
-                            <input type="number" min="0" class="score-input" value="${m.s1}" oninput="handleGroupScore('${letter}', ${index}, 1, this.value)">
-                            <span class="text-gray-300 text-xs font-bold px-1">X</span>
-                            <input type="number" min="0" class="score-input" value="${m.s2}" oninput="handleGroupScore('${letter}', ${index}, 2, this.value)">
+                        <div class="flex items-center justify-center px-1 sm:px-2 gap-1 sm:gap-2">
+                            <input type="number" inputmode="numeric" pattern="[0-9]*" class="score-input" value="${m.s1}" oninput="handleGroupScore('${letter}', ${index}, 1, this.value)">
+                            <span class="text-gray-300 text-[10px] sm:text-xs font-bold">X</span>
+                            <input type="number" inputmode="numeric" pattern="[0-9]*" class="score-input" value="${m.s2}" oninput="handleGroupScore('${letter}', ${index}, 2, this.value)">
                         </div>
-                        <div class="flex items-center gap-1 w-1/3 justify-start font-medium">
-                            ${T[m.t2].flag} <span class="truncate">${T[m.t2].name}</span>
+                        <div class="flex items-center gap-1 flex-1 justify-start font-medium">
+                            ${T[m.t2].flag} <span class="truncate max-w-[65px] sm:max-w-none">${T[m.t2].name}</span>
                         </div>
                     </div>
                 `).join('');
 
                 html += `
-                    <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row">
+                    <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden flex flex-col md:flex-row">
                         <div class="w-full md:w-1/2 flex flex-col">
-                            <div class="bg-gray-800 text-white px-4 py-3 text-sm font-bold uppercase tracking-wider flex justify-between items-center">
+                            <div class="bg-gray-800 text-white px-3 py-2 text-sm font-bold uppercase flex justify-between items-center">
                                 <span>Grupo ${letter}</span>
-                                <span class="text-xs font-normal text-gray-300 bg-gray-700 px-2 py-1 rounded">Tabela Real</span>
                             </div>
-                            <div class="p-2 flex-1"><table class="w-full text-left border-collapse">
-                                <thead><tr class="bg-gray-50 text-gray-500 text-xs">
-                                    <th class="px-2 py-2 w-8">#</th><th class="px-2 py-2">Seleção</th>
-                                    <th class="px-2 py-2 text-center" title="Pontos">P</th><th class="px-2 py-2 text-center" title="Jogos">J</th>
-                                    <th class="px-2 py-2 text-center" title="Saldo de Gols">SG</th><th class="px-2 py-2 text-center" title="Gols Pró">GP</th>
+                            <div class="p-1 sm:p-2 flex-1"><table class="w-full text-left border-collapse">
+                                <thead><tr class="bg-gray-50 text-gray-500 text-[10px] sm:text-xs">
+                                    <th class="px-1 py-1 text-center w-6">#</th><th class="px-1 py-1">Seleção</th>
+                                    <th class="px-1 py-1 text-center" title="Pontos">P</th>
+                                    <th class="px-1 py-1 text-center hidden sm:table-cell" title="Jogos">J</th>
+                                    <th class="px-1 py-1 text-center" title="Saldo de Gols">SG</th>
+                                    <th class="px-1 py-1 text-center" title="Gols Pró">GP</th>
                                 </tr></thead><tbody id="table-body-${letter}"></tbody>
                             </table></div>
                         </div>
-                        <div class="w-full md:w-1/2 bg-gray-100 p-3 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col gap-2 shadow-inner">
-                            <div class="text-xs font-bold text-gray-500 uppercase text-center mb-1 bg-white py-1 rounded shadow-sm border border-gray-200">Jogos do Grupo</div>
+                        <div class="w-full md:w-1/2 bg-gray-50 p-2 sm:p-3 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col gap-1.5 sm:gap-2">
+                            <div class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase text-center mb-1">Resultados</div>
                             ${matchesHtml}
                         </div>
                     </div>`;
@@ -437,22 +598,21 @@
             let html = groupLetters.map(l => {
                 let rows = groupData[l].table.map((t, i) => {
                     const isQual = qualifiedTeams.has(t.id);
-                    // Destaque em Verde para todos os Classificados
-                    const bgClass = isQual ? 'bg-green-100 border-l-4 border-green-500' : 'bg-white opacity-60';
+                    const bgClass = isQual ? 'bg-green-50 border-l-4 border-green-500' : 'bg-white opacity-60';
                     const textClass = isQual ? 'font-bold text-green-900' : 'text-gray-500';
                     
                     return `
-                    <tr class="border-t border-gray-200 ${bgClass} transition-colors">
-                        <td class="px-3 py-3 text-sm ${textClass}">${i + 1}</td>
-                        <td class="px-3 py-3 text-sm flex items-center gap-2 ${textClass}"><span>${T[t.id].flag}</span> ${T[t.id].name}</td>
-                        <td class="px-3 py-3 text-sm text-center ${textClass}">${t.pts} pts</td>
+                    <tr class="border-t border-gray-200 ${bgClass}">
+                        <td class="px-2 py-2 text-xs sm:text-sm text-center ${textClass}">${i + 1}</td>
+                        <td class="px-2 py-2 text-xs sm:text-sm flex items-center gap-2 ${textClass}"><span>${T[t.id].flag}</span> ${T[t.id].name}</td>
+                        <td class="px-2 py-2 text-xs sm:text-sm text-center ${textClass}">${t.pts} pts</td>
                     </tr>`;
                 }).join('');
                 
-                return `<div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden transform transition hover:scale-105 duration-300">
-                    <div class="bg-gray-800 text-white px-4 py-3 text-sm font-bold uppercase tracking-wider text-center">Grupo ${l}</div>
+                return `<div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-800 text-white px-3 py-2 text-xs sm:text-sm font-bold uppercase text-center">Grupo ${l}</div>
                     <table class="w-full text-left">
-                        <thead><tr class="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide"><th class="px-3 py-2 w-8">#</th><th class="px-3 py-2">Seleção</th><th class="px-3 py-2 text-center">Pts</th></tr></thead>
+                        <thead><tr class="bg-gray-50 text-gray-400 text-[10px] sm:text-xs uppercase"><th class="px-2 py-1 text-center w-8">#</th><th class="px-2 py-1">Seleção</th><th class="px-2 py-1 text-center">Pts</th></tr></thead>
                         <tbody>${rows}</tbody>
                     </table></div>`;
             }).join('');
@@ -462,45 +622,50 @@
         function renderBracketPrediction() {
             const container = document.getElementById('bracket-container');
             const roundsConfig = [
-                { id: 'r32', title: '16-avos de Final' }, { id: 'r16', title: 'Oitavas de Final' },
-                { id: 'qf', title: 'Quartas de Final' }, { id: 'sf', title: 'Semifinais' }, { id: 'final', title: 'Finais' }
+                { id: 'r32', title: '16-avos' }, { id: 'r16', title: 'Oitavas' },
+                { id: 'qf', title: 'Quartas' }, { id: 'sf', title: 'Semifinais' }, { id: 'final', title: 'Finais' }
             ];
 
             let html = roundsConfig.map(rc => {
                 let matchesHtml = knockoutData[rc.id].map((m, index) => {
-                    const t1Name = m.t1 ? T[m.t1].name : 'A definir';
-                    const t1Flag = m.t1 ? T[m.t1].flag : '❔';
-                    const t2Name = m.t2 ? T[m.t2].name : 'A definir';
-                    const t2Flag = m.t2 ? T[m.t2].flag : '❔';
+                    const isPlaceholderT1 = !m.t1 || !T[m.t1];
+                    const isPlaceholderT2 = !m.t2 || !T[m.t2];
+
+                    const t1Name = isPlaceholderT1 ? (m.t1 || 'A definir') : T[m.t1].name;
+                    const t1Flag = isPlaceholderT1 ? '<span class="w-4 inline-block text-center text-gray-300">-</span>' : T[m.t1].flag;
+                    const t2Name = isPlaceholderT2 ? (m.t2 || 'A definir') : T[m.t2].name;
+                    const t2Flag = isPlaceholderT2 ? '<span class="w-4 inline-block text-center text-gray-300">-</span>' : T[m.t2].flag;
                     
                     const isTied = (m.s1 !== '' && m.s2 !== '' && parseInt(m.s1) === parseInt(m.s2));
-                    const penaltyUI = isTied && m.t1 && m.t2 ? `
-                        <div class="text-xs font-semibold text-center mt-3 pt-2 border-t border-gray-100 text-gray-600 bg-gray-50 rounded p-1">
-                            Decisão por Pênaltis: 
-                            <div class="flex justify-center gap-2 mt-1">
-                                <button class="px-2 py-1 border rounded shadow-sm transition ${m.pen===1?'bg-green-500 text-white border-green-600':'bg-white hover:bg-gray-100'}" onclick="setPenalty('${rc.id}', ${index}, 1)">${T[m.t1].flag} Venceu</button>
-                                <button class="px-2 py-1 border rounded shadow-sm transition ${m.pen===2?'bg-green-500 text-white border-green-600':'bg-white hover:bg-gray-100'}" onclick="setPenalty('${rc.id}', ${index}, 2)">${T[m.t2].flag} Venceu</button>
+                    const penaltyUI = isTied && !isPlaceholderT1 && !isPlaceholderT2 ? `
+                        <div class="text-[9px] sm:text-[10px] font-bold text-center mt-2 pt-1 border-t border-gray-100 text-gray-500 bg-gray-50 uppercase tracking-wider">
+                            Pênaltis
+                            <div class="flex justify-center gap-1 mt-1 pb-1">
+                                <button class="px-2 py-1 border rounded shadow-sm transition ${m.pen===1?'bg-green-500 text-white border-green-600':'bg-white active:bg-gray-200'}" onclick="setPenalty('${rc.id}', ${index}, 1)">${T[m.t1].flag} Venceu</button>
+                                <button class="px-2 py-1 border rounded shadow-sm transition ${m.pen===2?'bg-green-500 text-white border-green-600':'bg-white active:bg-gray-200'}" onclick="setPenalty('${rc.id}', ${index}, 2)">${T[m.t2].flag} Venceu</button>
                             </div>
                         </div>
                     ` : '';
 
+                    const cardStyle = isPlaceholderT1 || isPlaceholderT2 ? '!border-l-gray-300 bg-gray-50 opacity-80' : 'bg-white';
+
                     return `
-                        <div class="match-card ${!m.t1 || !m.t2 ? 'opacity-60 grayscale' : ''}">
-                            ${m.title ? `<div class="text-xs font-extrabold text-center mb-2 text-yellow-600 uppercase tracking-widest bg-yellow-50 py-1 rounded">${m.title}</div>` : ''}
-                            <div class="team-row mt-1">
-                                <span class="flex items-center gap-2 text-sm font-semibold w-28 truncate text-gray-700" title="${t1Name}">${t1Flag} ${t1Name}</span>
-                                <input type="number" min="0" class="score-input" value="${m.s1}" ${!m.t1||!m.t2?'disabled':''} oninput="handleKnockoutScore('${rc.id}', ${index}, 1, this.value)">
+                        <div class="match-card ${cardStyle}">
+                            ${m.title ? `<div class="text-[10px] sm:text-xs font-extrabold text-center mb-1 text-yellow-600 uppercase tracking-widest bg-yellow-50 py-0.5 rounded">${m.title}</div>` : ''}
+                            <div class="team-row">
+                                <span class="flex items-center gap-1.5 text-xs sm:text-sm truncate w-[110px] sm:w-[130px] ${isPlaceholderT1 ? 'text-gray-400 italic font-normal' : 'text-gray-700 font-semibold'}" title="${t1Name}">${t1Flag} ${t1Name}</span>
+                                <input type="number" inputmode="numeric" pattern="[0-9]*" class="score-input" value="${m.s1}" ${isPlaceholderT1||isPlaceholderT2?'disabled':''} oninput="handleKnockoutScore('${rc.id}', ${index}, 1, this.value)">
                             </div>
-                            <div class="team-row mt-1">
-                                <span class="flex items-center gap-2 text-sm font-semibold w-28 truncate text-gray-700" title="${t2Name}">${t2Flag} ${t2Name}</span>
-                                <input type="number" min="0" class="score-input" value="${m.s2}" ${!m.t1||!m.t2?'disabled':''} oninput="handleKnockoutScore('${rc.id}', ${index}, 2, this.value)">
+                            <div class="team-row mt-0.5">
+                                <span class="flex items-center gap-1.5 text-xs sm:text-sm truncate w-[110px] sm:w-[130px] ${isPlaceholderT2 ? 'text-gray-400 italic font-normal' : 'text-gray-700 font-semibold'}" title="${t2Name}">${t2Flag} ${t2Name}</span>
+                                <input type="number" inputmode="numeric" pattern="[0-9]*" class="score-input" value="${m.s2}" ${isPlaceholderT1||isPlaceholderT2?'disabled':''} oninput="handleKnockoutScore('${rc.id}', ${index}, 2, this.value)">
                             </div>
                             ${penaltyUI}
                         </div>`;
                 }).join('');
                 
                 return `<div class="bracket-column relative">
-                    <h3 class="text-center font-bold text-white bg-gray-800 py-3 rounded-lg mb-4 text-xs uppercase tracking-widest shadow-md sticky top-0 z-10 border-b-4 border-green-500">${rc.title}</h3>
+                    <h3 class="text-center font-bold text-white bg-green-700 py-2 rounded mb-3 text-xs uppercase tracking-widest shadow-md sticky top-0 z-10 border-b-4 border-green-900">${rc.title}</h3>
                     <div class="matches-wrapper">
                         ${matchesHtml}
                     </div>
@@ -510,7 +675,6 @@
             container.innerHTML = html;
         }
 
-        // Inicia o App
         document.addEventListener("DOMContentLoaded", initApp);
     </script>
 </body>
