@@ -1,35 +1,56 @@
-# **🏆 Simulador e Calculadora \- Campeonato do Mundo 2026**
+# **🏆 Simulador Oficial \- Copa do Mundo FIFA 2026**
 
-Este projeto é uma aplicação web interativa construída num único ficheiro, desenvolvida para simular o Campeonato do Mundo da FIFA de 2026, com a introdução do novo formato de 48 seleções.
-
-## **📌 Descrição**
-
-O Simulador permite aos utilizadores prever e calcular o desenrolar de todo o torneio, desde a fase de grupos até à grande final. A aplicação possui um motor de cálculo em tempo real que atualiza as classificações, determina os apurados (incluindo a complexa regra dos 8 melhores terceiros classificados) e constrói automaticamente a árvore da fase a eliminar (mata-mata).
+Um simulador web interativo, responsivo e em tempo real para a **Copa do Mundo da FIFA de 2026**, construído em um único arquivo HTML. Este projeto implementa rigorosamente o novo formato da competição com **48 seleções**, 12 grupos e a inédita fase de 16-avos de final (Round of 32).
 
 ## **✨ Funcionalidades Principais**
 
-* **⚽ Simulador de Grupos Interativo:** Introduza os resultados de todos os 72 jogos da fase de grupos.  
-* **📊 Classificações em Tempo Real:** As tabelas são reordenadas instantaneamente após cada golo inserido. O sistema respeita os critérios de desempate de pontos, diferença de golos e golos marcados.  
-* **✅ Destaque Visual de Apuramento:** As 32 equipas qualificadas para a fase seguinte são automaticamente destacadas a verde nas tabelas.  
-* **⚔️ Chaveamento Automático do Mata-Mata:** A árvore da fase a eliminar (desde os 16-avos de final) é montada de forma dinâmica consoante as classificações da fase de grupos.  
-* **🥅 Suporte a Penáltis:** Se ocorrer um empate num jogo a eliminar, a interface exibe automaticamente botões para o utilizador decidir quem vence através da marcação de penáltis.  
-* **👑 Coroação do Campeão:** Quando o resultado da final é preenchido, um banner comemorativo surge no topo da página.  
-* **🧹 Limpeza Rápida:** Um botão global de "Limpar Resultados" para reiniciar a simulação rapidamente.
+* **📊 Classificação em Tempo Real:** Conforme os placares são digitados, a tabela de cada grupo é atualizada instantaneamente aplicando os critérios de desempate oficiais da FIFA (1. Pontos, 2\. Saldo de Gols, 3\. Gols Pró).  
+* **🎯 Regra dos Terceiros Colocados:** O algoritmo identifica automaticamente as 2 primeiras seleções de cada grupo e calcula de forma dinâmica os **8 melhores 3º colocados** para avançarem ao mata-mata.  
+* **⚔️ Chaveamento Dinâmico (Mata-Mata):** A árvore eliminatória inicia com marcações (placeholders) que indicam a origem de cada vaga (ex: "1º Grupo A", "3º C/D/F/G/H"). Assim que um grupo recebe resultados, as seleções assumem suas posições na chave automaticamente.  
+* **🥅 Decisão por Pênaltis:** Detecção inteligente de empates nos jogos eliminatórios, gerando botões na interface para o usuário decidir qual seleção avança após a prorrogação/pênaltis.  
+* **📱 Mobile-First:** Interface altamente otimizada para smartphones. Utiliza teclados numéricos nativos para digitação rápida de placares (inputmode="numeric"), rolagem horizontal suave (swipe) e layout ajustado para não quebrar em telas menores.  
+* **📲 Compartilhamento no WhatsApp:** Ao definir o campeão, o sistema utiliza a biblioteca html2canvas para gerar uma imagem PNG estilizada de um "Pódio" com o Campeão e o Vice, permitindo o compartilhamento direto pelo WhatsApp ou Web Share API nativa.  
+* **🧹 Botão de Reinício Rápido:** Limpa todos os resultados e zera a simulação com um único clique.
 
 ## **🛠️ Tecnologias Utilizadas**
 
-* **HTML5:** Estrutura semântica da aplicação.  
-* **CSS / Tailwind CSS:** Estilização moderna e responsiva (via CDN).  
-* **JavaScript (Vanilla):** Lógica da aplicação, cálculos de classificação e manipulação do DOM em tempo real.
+Este projeto foi desenvolvido focado em simplicidade, performance e portabilidade (Single-File Application):
 
-## **🚀 Como Utilizar**
+* **HTML5 & CSS3**  
+* **JavaScript Vanilla (ES6+)**: Toda a lógica de estado, algoritmos de chaveamento e reatividade do DOM, sem necessidade de frameworks pesados.  
+* **Tailwind CSS (via CDN)**: Estilização utilitária rápida e design responsivo.  
+* **html2canvas**: Renderização de elementos do DOM para geração da imagem de compartilhamento do campeão.
 
-1. Faça o download ou copie o código do ficheiro copa2026.html.  
-2. Dê um duplo clique no ficheiro para o abrir em qualquer navegador web moderno (Chrome, Firefox, Safari, Edge, etc.).  
-3. **Aba "Simulador de Grupos":** Insira os resultados desejados nos jogos para ver as tabelas a atualizarem-se.  
-4. **Aba "Grupos (Tempo Real)":** Acompanhe o estado de todas as equipas e veja quem se qualifica.  
-5. **Aba "Mata-Mata (Tempo Real)":** Avance na simulação introduzindo os resultados dos cruzamentos até descobrir quem levanta o troféu.
+## **⚙️ Regras Implementadas (Manual FIFA 2026\)**
 
-## **📱 Responsividade**
+O simulador foi desenhado respeitando as seguintes normativas projetadas para o formato de 2026:
 
-A interface foi concebida para funcionar de forma otimizada tanto em ambientes desktop como em dispositivos móveis, com a fase a eliminar implementada numa grelha com deslocamento (scroll) horizontal amigável.
+1. **Fase de Grupos:** 12 grupos (A a L) com 4 times cada. Avançam 32 seleções no total.  
+2. **Distribuição do Round of 32:** Segue o manual oficial de cruzamentos inaugurais (Jogos 1 a 16), onde os vencedores de grupos enfrentam os segundos colocados ou uma combinação matemática específica dos melhores terceiros colocados.
+
+## **🚀 Como Executar o Projeto**
+
+Como a aplicação é construída em um formato de arquivo único, não é necessário rodar processos de build complexos, configurar servidores locais ou ter o Node.js instalado.
+
+1. Faça o clone deste repositório:  
+   git clone \[https://github.com/seu-usuario/simulador-copa-2026.git\](https://github.com/seu-usuario/simulador-copa-2026.git)
+
+2. Navegue até o diretório do projeto.  
+3. Abra o arquivo copa2026.html diretamente em qualquer navegador moderno (Google Chrome, Safari, Firefox, Edge).  
+4. *Dica de Hospedagem:* Você pode hospedar gratuitamente através do **GitHub Pages** ou **Vercel** subindo apenas este arquivo HTML.
+
+## **🤝 Como Contribuir**
+
+Contribuições, relatórios de bugs (issues) e pull requests são muito bem-vindos\! Se você encontrar alguma falha na lógica de classificação ou tiver uma ideia de melhoria na Interface de Usuário:
+
+1. Faça um *Fork* do projeto.  
+2. Crie uma *Branch* para sua alteração (git checkout \-b feature/MelhoriaIncrivel).  
+3. Faça o *Commit* das suas mudanças (git commit \-m 'feat: Adiciona MelhoriaIncrivel').  
+4. Faça o *Push* para a Branch (git push origin feature/MelhoriaIncrivel).  
+5. Abra um *Pull Request*.
+
+## **📜 Licença**
+
+Distribuído sob a licença MIT.
+
+*Desenvolvido para os amantes do futebol mundial e entusiastas de simulações esportivas.*
